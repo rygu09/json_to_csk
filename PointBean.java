@@ -2,22 +2,32 @@ package json_to_csk;
 
 public class PointBean {
 	
-	private float eX,eY;
+	private double eX,eY,sX,sY;
 	private int pressure;
 	private long t;
-
-	
-	public float geteX() {
+	public double geteX() {
 		return eX;
 	}
-	public void seteX(float eX) {
+	public void seteX(double eX) {
 		this.eX = eX;
 	}
-	public float geteY() {
+	public double geteY() {
 		return eY;
 	}
-	public void seteY(float eY) {
+	public void seteY(double eY) {
 		this.eY = eY;
+	}
+	public double getsX() {
+		return sX;
+	}
+	public void setsX(double sX) {
+		this.sX = sX;
+	}
+	public double getsY() {
+		return sY;
+	}
+	public void setsY(double sY) {
+		this.sY = sY;
 	}
 	public int getPressure() {
 		return pressure;
@@ -28,7 +38,7 @@ public class PointBean {
 	public long getT() {
 		return t;
 	}
-	public void setT(int t) {
+	public void setT(long t) {
 		this.t = t;
 	}	
 
