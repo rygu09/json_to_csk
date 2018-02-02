@@ -1,10 +1,13 @@
 package json_to_csk;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,93 +18,156 @@ import com.google.gson.reflect.TypeToken;
 public class ChangeMethod {
 	
 	public static void main(String[] args) {
-		String path="C:\\Users\\admin\\Desktop\\4201.json";
-		change(path);
+//		String path="C:\\Users\\admin\\Desktop\\4201.json";
+		String from="D:\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.json";
+		String to="D:\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.csk";
+
+		String content=change(from);
+		writeDataToFile(content,to);
 	}
 	
-	public static void change(String path) {
+	/*
+	 * json 转 csk
+	 * @param path
+	 */
+	public static String change(String path) {
 		
-		List<Float> eX_Array=new ArrayList<>();
-		List<Float> eY_Array=new ArrayList<>();
+		List<Double> sX_Array=new ArrayList<>();
+		List<Double> sY_Array=new ArrayList<>();
+
+		List<Double> eX_Array=new ArrayList<>();
+		List<Double> eY_Array=new ArrayList<>();
+		
 		List<Integer> pressure_Array=new ArrayList<>();
 		List<Long> t_Array=new ArrayList<>();
 		
 		int length;
-		StringBuilder stringBuilder=new StringBuilder();
+		int num=1;
+		int index=0;
+
 		
-//		List<PointBean> pointBeanList=new ArrayList<>();
+		Boolean boolean_X,boolean_Y;
+		
+		StringBuilder stringBuilder=new StringBuilder();		
 		
 		Gson gson = new GsonBuilder().create();
 		
 		String message=getStringFromJsonFile(path);
-//		System.out.println(message);
 		
 		List<PointBean> pointBeanList = gson.fromJson(message, new TypeToken<List<PointBean>>() {}.getType());
 		
 		/**
-		 * ����List��������Ԫ�طֿ����浽��ͬ������
+		 * 遍历List，将各个元素分开来存到不同数组中
 		 */
 		for(PointBean p:pointBeanList) {
-			eX_Array.add(p.geteX());
-			eY_Array.add(p.geteY());
-			pressure_Array.add(p.getPressure());
-			t_Array.add(p.getT());
-
-//			System.out.print(p.getPressure()+"  ");
-//			System.out.print(p.geteX()+"  ");
+			if(p.geteX()!=0 && p.geteY()!=0 ) {//通过判断x，y不为0，剔除掉其余josn对象
+				
+				sX_Array.add(p.getsX());
+				sY_Array.add(p.getsY());
+				
+				eX_Array.add(p.geteX());
+				eY_Array.add(p.geteY());
+				
+				pressure_Array.add(p.getPressure());
+				t_Array.add(p.getT());
+			}
 		}
 		
 		length=eX_Array.size();
 		
 		for(int i=0;i<length;i++) {
-			stringBuilder.append("<point ")
-						 .append("y=\"")
-						 .append(eY_Array.get(i))
-						 .append("\" x=\"")
-						 .append(eX_Array.get(i))
-						 .append("\" pressure=\"")
-						 .append(pressure_Array.get(i))
-						 .append("\" timestamp=\"")
-						 .append(t_Array.get(i))
-						 .append("\" />")
-						 .append("\r\n");
+			/*
+			 * 奇数次出现sX=eX sY=eY
+			 * 加<stroke label="30" index="30">
+			 * 再加点的信息
+			 */						
+			boolean_X=sX_Array.get(i).toString().equals(eX_Array.get(i).toString());
+			boolean_Y=sY_Array.get(i).toString().equals(eY_Array.get(i).toString());
+			System.out.println(boolean_X+"  "+boolean_Y);
+			
+			if(boolean_X && boolean_Y && num%2==1) {
+				
+				num++;
+				index=(num+1)/2;
+				//<stroke label="30" index="30">
+				stringBuilder.append("<stroke label=\""+index+"\" index=\""+index+"\">"+"\r\n");							 				
+				
+				stringBuilder
+				.append("  ")
+				.append("<point ")
+//				.append("sY="+sY_Array.get(i)+" ")
+//				.append("sX="+sX_Array.get(i)+" ")
+				.append("y=\""+eY_Array.get(i)+"\" ")
+				.append("x=\""+eX_Array.get(i)+"\" ")
+				.append("pressure=\""+pressure_Array.get(i)+"\" ")
+				.append("timestamp=\""+t_Array.get(i)+"\" />")
+				.append("\r\n");
+				
+			}
+			/*
+			 * 偶数次出现sX=eX sY=eY
+			 * 先加点的信息
+			 * 再加</stroke>
+			 */
+			else if(boolean_X && boolean_Y && num%2==0){							
+				
+				/*
+				 * 拼接成一个point
+				 * <point y="73.3500" x="99.4875" pressure="124" timestamp="1273248698972" />
+				 */
+				stringBuilder
+				.append("  ")
+				.append("<point ")
+//				.append("sY="+sY_Array.get(i)+" ")
+//				.append("sX="+sX_Array.get(i)+" ")
+				.append("y=\""+eY_Array.get(i)+"\" ")
+				.append("x=\""+eX_Array.get(i)+"\" ")
+				.append("pressure=\""+pressure_Array.get(i)+"\" ")
+				.append("timestamp=\""+t_Array.get(i)+"\" />")
+				.append("\r\n");
+				
+				//<stroke label="30" index="30">
+				stringBuilder.append("</stroke>"+"\r\n");				
+				num++;
+			}else {
+				/*
+				 * 拼接point
+				 * <point y="73.3500" x="99.4875" pressure="124" timestamp="1273248698972" />
+				 */
+				stringBuilder
+				.append("  ")
+				.append("<point ")
+//				.append("sY="+sY_Array.get(i)+" ")
+//				.append("sX="+sX_Array.get(i)+" ")
+				.append("y=\""+eY_Array.get(i)+"\" ")
+				.append("x=\""+eX_Array.get(i)+"\" ")
+				.append("pressure=\""+pressure_Array.get(i)+"\" ")
+				.append("timestamp=\""+t_Array.get(i)+"\" />")
+				.append("\r\n");				
+			}			
+				
 		}
-		System.out.println(stringBuilder);
+		System.out.println(stringBuilder.toString());        
+		System.out.println("一共有"+length+"行数据");
 		
-		
-//		JsonReader reader = new JsonReader(new StringReader(message));
-//		reader.setLenient(true);		
-//		PointBean pointBean= gson.fromJson(reader, PointBean.class);
-		
-		
-//		pointBeanList= gson.fromJson(reader, PointBean.class);
-//		for(PointBean p:pointBeanList) {
-//			System.out.println(p);
-//		}
-
-//		JsonParser jsonParser=new JsonParser();
-//        JsonArray jsonArray=jsonParser.parse(path).getAsJsonArray();
-//        for(int i=1;i<jsonArray.size();i++){
-//            JsonObject jsonObject=jsonArray.get(i).getAsJsonObject();
-//           
-//            PointBean pointBean=gson.fromJson(jsonObject,PointBean.class);
-//            pointBeanList.add(pointBean);
-//        }
-        
+		return stringBuilder.toString();
 	}
 	
+	/**
+	 * 获取json文件，将其中内容写出到一个字符串，并返回
+	 * @param path
+	 * @return
+	 */
 	public static String getStringFromJsonFile(String path) {
 		File file = new File(path);
 		BufferedReader reader = null; 
-        StringBuilder builder=null;        
+        StringBuilder builder=null;           
          
-        System.out.println("���ַ�Ϊ��λ��ȡ�ļ����ݣ�һ�ζ�һ���ֽڣ�");  
-        // һ�ζ�һ���ַ�  
         try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 			int tempchar;
 			builder=new StringBuilder();
-			while ((tempchar = reader.read()) != -1) {  
+			while ((tempchar = reader.read()) != -1) {  // 一次读一个字符 
 				builder.append((char)tempchar);            	
 			}             
 		} catch (Exception e) {  
@@ -113,10 +179,31 @@ public class ChangeMethod {
                 } catch (IOException e1) {  
                 }  
             }  
-        }  		
-        
-		return builder.toString();		
-        
+        }  		        
+		return builder.toString();        
 	}
-
+	
+	public static void writeDataToFile(String content,String destination) {
+		File file = new File(destination);		
+//        StringBuilder builder=null; 
+		PrintWriter printWriter=null;
+		FileOutputStream fileOutputStream=null;
+		try {
+			if(!file.exists()) {
+				file.createNewFile();			
+			}
+			fileOutputStream=new FileOutputStream(file);
+	        printWriter=new PrintWriter(fileOutputStream);
+	        printWriter.write(content);
+	        printWriter.flush();			
+	        fileOutputStream.close();         
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			if(printWriter!=null) {
+				printWriter.close();
+			}			
+		}     
+	}
 }
