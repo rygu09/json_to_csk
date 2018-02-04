@@ -16,15 +16,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class ChangeMethod {
+public class ChangeMethod2 {
 	
 	public static void main(String[] args) {
 //		String path="C:\\Users\\admin\\Desktop\\4201.json";
 //		String from="D:\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.json";
 //		String to="D:\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.csk";
 
+		
+//		String from="F:\\05 iflytek\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.json";
+//		String to="F:\\05 iflytek\\study_resouce\\项目\\15755141202_207\\15755141202\\4241\\4241.csk";
+		
 		String from="C:/Users/GRY/Desktop/4241.json";
-		String to="C:/Users/GRY/Desktop/4241.csk";
+		String to="C:/Users/GRY/Desktop/4241.csk";		
 		
 		String content=change(from);
 		writeDataToFile(content,to);
@@ -36,11 +40,11 @@ public class ChangeMethod {
 	 */
 	public static String change(String path) {
 		
-		List<Double> sX_Array=new ArrayList<>();
-		List<Double> sY_Array=new ArrayList<>();
+		List<String> sX_Array=new ArrayList<>();
+		List<String> sY_Array=new ArrayList<>();
 
-		List<Double> eX_Array=new ArrayList<>();
-		List<Double> eY_Array=new ArrayList<>();
+		List<String> eX_Array=new ArrayList<>();
+		List<String> eY_Array=new ArrayList<>();
 		
 		List<Integer> pressure_Array=new ArrayList<>();
 		List<Long> t_Array=new ArrayList<>();
@@ -58,13 +62,13 @@ public class ChangeMethod {
 		
 		String message=getStringFromJsonFile(path);
 		
-		List<PointBean> pointBeanList = gson.fromJson(message, new TypeToken<List<PointBean>>() {}.getType());
+		List<PointBean2> pointBeanList2 = gson.fromJson(message, new TypeToken<List<PointBean2>>() {}.getType());
 		
 		/**
 		 * 遍历List，将各个元素分开来存到不同数组中
 		 */
-		for(PointBean p:pointBeanList) {
-			if(p.geteX()!=0 && p.geteY()!=0 ) {//通过判断x，y不为0，剔除掉其余josn对象
+		for(PointBean2 p:pointBeanList2) {
+			if(!(p.geteX().equals("0")) && !(p.geteY().equals("0")) ) {//通过判断x，y不为0，剔除掉其余josn对象
 				
 				sX_Array.add(p.getsX());
 				sY_Array.add(p.getsY());
@@ -92,8 +96,8 @@ public class ChangeMethod {
 		 * 循环读取每一点
 		 */
 		for(int i=0;i<length;i++) {
-			boolean_X=sX_Array.get(i).toString().equals(eX_Array.get(i).toString());
-			boolean_Y=sY_Array.get(i).toString().equals(eY_Array.get(i).toString());
+			boolean_X=sX_Array.get(i).equals(eX_Array.get(i).toString());
+			boolean_Y=sY_Array.get(i).equals(eY_Array.get(i).toString());
 			System.out.println(boolean_X+"  "+boolean_Y);		
 			
 			/*
@@ -238,3 +242,4 @@ public class ChangeMethod {
 	     
 	} 
 }
+
